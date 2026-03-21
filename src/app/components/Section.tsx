@@ -50,34 +50,35 @@ export default function Section({ title, content, onUpdate }: Props) {
     const lines = text.split("\n").filter((line) => line.trim());
 
     return (
-      <div className="space-y-3">
+      <div className="space-y-4 text-slate-700">
         {lines.map((line, idx) => {
           // Bullet points
           if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
             return (
-              <div key={idx} className="flex gap-3 text-gray-700">
-                <span className="text-blue-500 font-bold">•</span>
-                <span>{line.replace(/^[•-]\s*/, "")}</span>
+              <div key={idx} className="flex gap-3 items-start">
+                <span className="text-blue-600 font-bold mt-0.5 flex-shrink-0">•</span>
+                <span className="pt-0.5">{line.replace(/^[•-]\s*/, "")}</span>
               </div>
             );
           }
 
           // Numbered steps
           if (/^\d+\.\s/.test(line.trim())) {
-            return (
-              <div key={idx} className="flex gap-3 text-gray-700">
-                <span className="font-semibold text-blue-500 min-w-6">
-                  {line.match(/^\d+/)?.[0]}.
-                </span>
-                <span>{line.replace(/^\d+\.\s*/, "")}</span>
-              </div>
-            );
+            const match = line.match(/^(\d+)\.\s(.+)$/);
+            if (match) {
+              return (
+                <div key={idx} className="flex gap-3 items-start">
+                  <span className="font-bold text-blue-600 min-w-8 flex-shrink-0">{match[1]}.</span>
+                  <span className="pt-0.5">{match[2]}</span>
+                </div>
+              );
+            }
           }
 
           // Bold headings (text ending with :)
-          if (line.trim().endsWith(":")) {
+          if (line.trim().endsWith(":") && line.trim().length > 2) {
             return (
-              <p key={idx} className="font-semibold text-gray-900 mt-2">
+              <p key={idx} className="font-bold text-slate-900 mt-4 mb-2 text-lg">
                 {line}
               </p>
             );
@@ -85,7 +86,7 @@ export default function Section({ title, content, onUpdate }: Props) {
 
           // Regular paragraphs
           return (
-            <p key={idx} className="text-gray-700 leading-relaxed">
+            <p key={idx} className="leading-relaxed text-slate-700">
               {line}
             </p>
           );
@@ -95,29 +96,29 @@ export default function Section({ title, content, onUpdate }: Props) {
   };
 
   return (
-    <div className="border border-gray-200 rounded-xl p-6 bg-white shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow print:page-break-inside-avoid">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
         {!isEditing && onUpdate && (
           <div className="flex gap-2">
             <button
-              onClick={() => handleRefine("Make this more detailed and comprehensive")}
+              onClick={() => handleRefine("Make this more detailed and comprehensive, add more context")}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 disabled:opacity-50"
+              className="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 disabled:opacity-50 transition-colors font-medium"
             >
               {isLoading ? "..." : "✨ Detailed"}
             </button>
             <button
-              onClick={() => handleRefine("Shorten this significantly while keeping key points")}
+              onClick={() => handleRefine("Shorten this significantly while keeping all key points")}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-amber-50 text-amber-600 rounded-md hover:bg-amber-100 disabled:opacity-50"
+              className="px-3 py-1 text-sm bg-amber-50 text-amber-700 rounded-md hover:bg-amber-100 disabled:opacity-50 transition-colors font-medium"
             >
               {isLoading ? "..." : "⚡ Shorten"}
             </button>
             <button
               onClick={() => setIsEditing(true)}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              className="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors font-medium"
             >
               ✏️ Edit
             </button>
@@ -125,30 +126,33 @@ export default function Section({ title, content, onUpdate }: Props) {
         )}
       </div>
 
+      {/* Divider */}
+      <div className="h-1 bg-gradient-to-r from-blue-500 to-transparent mb-6"></div>
+
       {/* Content View */}
-      {!isEditing && <div>{renderContent(content)}</div>}
+      {!isEditing && <div className="print:text-xs">{renderContent(content)}</div>}
 
       {/* Edit Mode */}
       {isEditing && onUpdate && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-            rows={8}
+            className="w-full border border-slate-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-slate-700"
+            rows={10}
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+              className="px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Save
+              Save Changes
             </button>
           </div>
         </div>
