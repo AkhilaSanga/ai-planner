@@ -2,7 +2,6 @@ import axios from "axios";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
-console.log("ENV KEY:", process.env.GROQ_API_KEY);
 export async function callAI(prompt: string) {
   try {
     const response = await axios.post(

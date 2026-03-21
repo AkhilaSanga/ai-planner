@@ -32,8 +32,21 @@ ${insightOutput}
   let parsed;
 
   try {
-    parsed = JSON.parse(raw);
-  } catch {
+    // Remove markdown if present
+  let cleaned = raw.replace(/```json|```/g, "").trim();
+
+  // Extract only JSON part (important fix)
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+
+  if (start !== -1 && end !== -1) {
+    cleaned = cleaned.substring(start, end + 1);
+  }
+
+  parsed = JSON.parse(cleaned);
+} catch (e) {
+  console.log("❌ JSON Parse Failed:", raw);
+
     parsed = {
       problemBreakdown: raw, // return raw text if parsing fails
       stakeholders: "Not generated",

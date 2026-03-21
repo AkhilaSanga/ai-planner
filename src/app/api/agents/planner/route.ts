@@ -17,7 +17,8 @@ Return JSON ONLY:
   "stakeholders": ["user", "admin"]
 }
 `;
-
+  console.log("Calling AI...");
+  
   const result = await callAI(prompt);
 
   return Response.json({ data: result });
