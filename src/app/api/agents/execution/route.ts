@@ -6,22 +6,28 @@ export async function POST(req: Request) {
   const prompt = `
 You are an execution agent.
 
-Convert the input into a structured business report.
+Return ONLY valid JSON. No markdown. No code blocks.
 
-Return ONLY JSON in this format:
+IMPORTANT:
+- All fields MUST be plain strings (no objects, no arrays)
+- Do NOT use \`\`\`json or formatting
 
+Format:
 {
-  "problemBreakdown": "...",
-  "stakeholders": "...",
-  "solution": "...",
-  "actionPlan": "..."
+  "problemBreakdown": "Explain in clear paragraphs",
+  "stakeholders": "List stakeholders in text format",
+  "solution": "Explain solution clearly",
+  "actionPlan": "Step-by-step plan in text"
 }
 
 Input:
 ${insightOutput}
 `;
 
-  const raw = await callAI(prompt);
+  let raw = await callAI(prompt);
+
+  // ✅ Remove markdown if AI still sends it
+  raw = raw.replace(/```json|```/g, "").trim();
 
   let parsed;
 
@@ -29,7 +35,7 @@ ${insightOutput}
     parsed = JSON.parse(raw);
   } catch {
     parsed = {
-      problemBreakdown: raw || "No data",
+      problemBreakdown: raw, // return raw text if parsing fails
       stakeholders: "Not generated",
       solution: "Not generated",
       actionPlan: "Not generated",
