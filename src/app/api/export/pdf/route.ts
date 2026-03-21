@@ -7,267 +7,203 @@ type Report = {
   actionPlan: string;
 };
 
-function generateHTML(
-  report: Report,
-  problemStatement: string,
-  timestamp: string
-): string {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="UTF-8">
-      <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.6;
-          color: #1f2937;
-          background: #ffffff;
-          padding: 40px;
-        }
-
-        h1 {
-          font-size: 36px;
-          font-weight: 700;
-          color: #ffffff;
-          background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
-          padding: 40px;
-          text-align: center;
-          border-radius: 8px;
-          margin-bottom: 20px;
-        }
-
-        .subtitle {
-          text-align: center;
-          font-size: 18px;
-          color: #666;
-          margin-bottom: 40px;
-          font-style: italic;
-        }
-
-        .timestamp {
-          text-align: center;
-          font-size: 12px;
-          color: #999;
-          margin-bottom: 60px;
-          border-top: 1px solid #e5e7eb;
-          padding-top: 20px;
-        }
-
-        h2 {
-          font-size: 24px;
-          font-weight: 700;
-          color: #1e40af;
-          margin: 40px 0 20px 0;
-          padding-bottom: 10px;
-          border-bottom: 2px solid #1e40af;
-          page-break-before: always;
-          page-break-after: avoid;
-        }
-
-        .section {
-          margin-bottom: 30px;
-        }
-
-        .section p {
-          margin-bottom: 12px;
-          line-height: 1.8;
-          color: #374151;
-        }
-
-        .bullet-item {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 10px;
-          align-items: flex-start;
-          color: #374151;
-        }
-
-        .bullet-item::before {
-          content: "•";
-          color: #1e40af;
-          font-weight: bold;
-          flex-shrink: 0;
-          font-size: 16px;
-          line-height: 1.6;
-        }
-
-        .number-item {
-          display: flex;
-          gap: 12px;
-          margin-bottom: 10px;
-          align-items: flex-start;
-          color: #374151;
-        }
-
-        .number-item::before {
-          content: counter(item);
-          counter-increment: item;
-          color: #1e40af;
-          font-weight: bold;
-          flex-shrink: 0;
-          min-width: 24px;
-        }
-
-        .heading-item {
-          font-size: 14px;
-          font-weight: 600;
-          color: #111827;
-          margin-top: 20px;
-          margin-bottom: 10px;
-        }
-
-        .footer {
-          margin-top: 60px;
-          padding-top: 20px;
-          border-top: 1px solid #e5e7eb;
-          text-align: center;
-          color: #6b7280;
-          font-size: 12px;
-          page-break-before: avoid;
-        }
-
-        @media print {
-          body {
-            padding: 0;
-          }
-          h2 {
-            page-break-before: always;
-            page-break-after: avoid;
-          }
-        }
-      </style>
-    </head>
-    <body>
-      <h1>Strategic Planning Report</h1>
-      <div class="subtitle">${problemStatement}</div>
-      <div class="timestamp">Generated: ${new Date(timestamp).toLocaleDateString()}</div>
-
-      <h2>📋 Problem Breakdown</h2>
-      <div class="section">
-        ${report.problemBreakdown
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => {
-            const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
-              return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
-            }
-            if (/^\d+\.\s/.test(escaped.trim())) {
-              return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
-            }
-            if (escaped.trim().endsWith(":")) {
-              return `<div class="heading-item">${escaped}</div>`;
-            }
-            return `<p>${escaped}</p>`;
-          })
-          .join("")}
-      </div>
-
-      <h2>👥 Key Stakeholders</h2>
-      <div class="section">
-        ${report.stakeholders
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => {
-            const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
-              return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
-            }
-            if (/^\d+\.\s/.test(escaped.trim())) {
-              return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
-            }
-            if (escaped.trim().endsWith(":")) {
-              return `<div class="heading-item">${escaped}</div>`;
-            }
-            return `<p>${escaped}</p>`;
-          })
-          .join("")}
-      </div>
-
-      <h2>💡 Solution Approach</h2>
-      <div class="section">
-        ${report.solution
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => {
-            const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
-              return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
-            }
-            if (/^\d+\.\s/.test(escaped.trim())) {
-              return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
-            }
-            if (escaped.trim().endsWith(":")) {
-              return `<div class="heading-item">${escaped}</div>`;
-            }
-            return `<p>${escaped}</p>`;
-          })
-          .join("")}
-      </div>
-
-      <h2>🎯 Action Plan</h2>
-      <div class="section">
-        ${report.actionPlan
-          .split("\n")
-          .filter((line) => line.trim())
-          .map((line) => {
-            const escaped = line.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-            if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
-              return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
-            }
-            if (/^\d+\.\s/.test(escaped.trim())) {
-              return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
-            }
-            if (escaped.trim().endsWith(":")) {
-              return `<div class="heading-item">${escaped}</div>`;
-            }
-            return `<p>${escaped}</p>`;
-          })
-          .join("")}
-      </div>
-
-      <div class="footer">
-        <p>Generated by AI Planning Agent • Strategic planning made simple</p>
-      </div>
-    </body>
-    </html>
-  `;
-}
-
 export async function POST(req: Request) {
   try {
     const { reportData } = await req.json();
     const { report, problemStatement, timestamp } = reportData;
 
-    const htmlContent = generateHTML(report, problemStatement, timestamp);
+    // Generate HTML content
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Strategic Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+      background: white;
+    }
+    .cover {
+      text-align: center;
+      padding: 60px 20px;
+      border-bottom: 2px solid #1e40af;
+      margin-bottom: 40px;
+    }
+    .cover h1 {
+      color: #1e40af;
+      font-size: 32px;
+      margin: 0 0 20px 0;
+    }
+    .cover p {
+      font-size: 16px;
+      color: #666;
+      margin: 10px 0;
+    }
+    .section {
+      margin-bottom: 40px;
+      page-break-inside: avoid;
+    }
+    .section h2 {
+      color: #1e40af;
+      font-size: 20px;
+      border-bottom: 2px solid #1e40af;
+      padding-bottom: 10px;
+      margin-top: 30px;
+      page-break-after: avoid;
+    }
+    .section-content {
+      margin-top: 15px;
+    }
+    .bullet {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+    .bullet::before {
+      content: "• ";
+      color: #1e40af;
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    .number {
+      margin-left: 20px;
+      margin-bottom: 8px;
+    }
+    .number::before {
+      content: counter(item) ". ";
+      color: #1e40af;
+      font-weight: bold;
+      counter-increment: item;
+    }
+    .heading {
+      font-weight: bold;
+      margin-top: 15px;
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .paragraph {
+      margin-bottom: 12px;
+    }
+    .footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid #ddd;
+      text-align: center;
+      color: #999;
+      font-size: 12px;
+    }
+    @media print {
+      body { margin: 0; padding: 0; }
+      .section { page-break-inside: avoid; }
+      .section h2 { page-break-after: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="cover">
+    <h1>Strategic Planning Report</h1>
+    <p><strong>${escapeHtml(problemStatement)}</strong></p>
+    <p>Generated: ${new Date(timestamp).toLocaleDateString()}</p>
+  </div>
 
-    // For server-side PDF generation, we'll use html2pdf or similar
-    // Install with: npm install html2pdf.js
-    // Or use Vercel's built-in PDF rendering
+  <div class="section">
+    <h2>Problem Breakdown</h2>
+    <div class="section-content">
+      ${formatContent(report.problemBreakdown)}
+    </div>
+  </div>
 
-    // Simple approach: return HTML for client-side conversion
-    // In production, use puppeteer or similar for server-side rendering
+  <div class="section">
+    <h2>Key Stakeholders</h2>
+    <div class="section-content">
+      ${formatContent(report.stakeholders)}
+    </div>
+  </div>
 
-    const pdf = Buffer.from(htmlContent);
+  <div class="section">
+    <h2>Solution Approach</h2>
+    <div class="section-content">
+      ${formatContent(report.solution)}
+    </div>
+  </div>
 
-    return new NextResponse(pdf, {
+  <div class="section">
+    <h2>Action Plan</h2>
+    <div class="section-content">
+      ${formatContent(report.actionPlan)}
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Generated by AI Planning Agent • Strategic planning made simple</p>
+  </div>
+</body>
+</html>
+    `;
+
+    // Return the HTML as a blob that can be converted to PDF on client
+    return new Response(htmlContent, {
       headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="strategic-report-${Date.now()}.pdf"`,
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Disposition": `inline; filename="report-${Date.now()}.html"`,
       },
     });
   } catch (error) {
     console.error("PDF export error:", error);
     return NextResponse.json(
-      { error: "Export failed" },
+      { error: "Export failed", success: false },
       { status: 500 }
     );
   }
+}
+
+function escapeHtml(text: string): string {
+  const map: { [key: string]: string } = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  };
+  return text.replace(/[&<>"']/g, (m) => map[m]);
+}
+
+function formatContent(content: string): string {
+  const lines = content.split("\n").filter((line) => line.trim());
+  let html = "";
+  let inNumberedList = false;
+  let numberCounter = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const escaped = escapeHtml(trimmed);
+
+    // Heading (ends with :)
+    if (escaped.endsWith(":") && escaped.length > 2) {
+      html += `<div class="heading">${escaped}</div>`;
+      inNumberedList = false;
+    }
+    // Bullet point
+    else if (escaped.startsWith("•") || escaped.startsWith("-")) {
+      const text = escaped.replace(/^[•-]\s*/, "");
+      html += `<div class="bullet">${text}</div>`;
+      inNumberedList = false;
+    }
+    // Numbered item
+    else if (/^\d+\.\s/.test(escaped)) {
+      const text = escaped.replace(/^\d+\.\s*/, "");
+      html += `<div class="number">${text}</div>`;
+    }
+    // Regular paragraph
+    else {
+      html += `<div class="paragraph">${escaped}</div>`;
+      inNumberedList = false;
+    }
+  }
+
+  return html;
 }

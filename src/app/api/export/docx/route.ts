@@ -1,4 +1,4 @@
-import { Document, Packer, Paragraph, BorderStyle, AlignmentType, TextRun, HeadingLevel } from "docx";
+import { NextResponse } from "next/server";
 
 type Report = {
   problemBreakdown: string;
@@ -7,250 +7,322 @@ type Report = {
   actionPlan: string;
 };
 
-function formatText(content: string): Paragraph[] {
-  const lines = content.split("\n").filter((line) => line.trim());
-  const paragraphs: Paragraph[] = [];
+function escapeHtml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
-  for (const line of lines) {
-    // Bullet points
-    if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
-      paragraphs.push(
-        new Paragraph({
-          text: line.replace(/^[•-]\s*/, ""),
-          bullet: {
-            level: 0,
-          },
-          spacing: { line: 240, after: 100 },
-        })
-      );
+function generateHTMLForPDF(
+  report: Report,
+  problemStatement: string,
+  timestamp: string
+): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    // Numbered steps
-    else if (/^\d+\.\s/.test(line.trim())) {
-      const match = line.match(/^(\d+)\.\s(.+)$/);
-      if (match) {
-        paragraphs.push(
-          new Paragraph({
-            text: match[2],
-            numPr: {
-              ilvl: 0,
-              numId: 1,
-            },
-            spacing: { line: 240, after: 100 },
-          })
-        );
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #ffffff;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    .title-page {
+      text-align: center;
+      padding: 100px 40px;
+      background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+      color: white;
+      margin-bottom: 60px;
+      page-break-after: always;
+    }
+
+    .title-page h1 {
+      font-size: 42px;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+
+    .title-page .problem {
+      font-size: 18px;
+      margin-bottom: 40px;
+      opacity: 0.95;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .title-page .timestamp {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    .toc {
+      page-break-after: always;
+      margin-bottom: 40px;
+    }
+
+    .toc h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #1e40af;
+    }
+
+    .toc ul {
+      list-style: none;
+    }
+
+    .toc li {
+      margin-bottom: 10px;
+      padding-left: 20px;
+      font-size: 14px;
+    }
+
+    h2 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e40af;
+      margin: 60px 0 30px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1e40af;
+      page-break-after: avoid;
+    }
+
+    .section {
+      margin-bottom: 40px;
+      page-break-inside: avoid;
+    }
+
+    .section p {
+      margin-bottom: 15px;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .bullet-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+    }
+
+    .bullet-item::before {
+      content: "•";
+      color: #1e40af;
+      font-weight: bold;
+      flex-shrink: 0;
+      font-size: 16px;
+      line-height: 1.4;
+    }
+
+    .number-item {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+      counter-increment: item;
+    }
+
+    .number-item::before {
+      content: counter(item) ".";
+      color: #1e40af;
+      font-weight: bold;
+      flex-shrink: 0;
+      min-width: 24px;
+    }
+
+    .heading-item {
+      font-size: 15px;
+      font-weight: 600;
+      color: #111827;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      page-break-after: avoid;
+    }
+
+    .footer {
+      margin-top: 80px;
+      padding-top: 20px;
+      border-top: 1px solid #e5e7eb;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+      page-break-before: avoid;
+    }
+
+    @page {
+      size: A4;
+      margin: 0.5in;
+    }
+
+    @media print {
+      body {
+        background: white;
+      }
+      .section {
+        page-break-inside: avoid;
+      }
+      h2 {
+        page-break-after: avoid;
+        page-break-before: always;
       }
     }
-    // Headings (lines ending with :)
-    else if (line.trim().endsWith(":") && line.trim().length > 2) {
-      paragraphs.push(
-        new Paragraph({
-          text: line.replace(/:$/, ""),
-          heading: HeadingLevel.HEADING_3,
-          spacing: { before: 200, after: 100 },
-          bold: true,
-        })
-      );
-    }
-    // Regular paragraphs
-    else if (line.trim()) {
-      paragraphs.push(
-        new Paragraph({
-          text: line,
-          spacing: { line: 240, after: 150 },
-        })
-      );
-    }
-  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Title Page -->
+    <div class="title-page">
+      <h1>Strategic Planning Report</h1>
+      <div class="problem">${escapeHtml(problemStatement)}</div>
+      <div class="timestamp">Generated: ${new Date(timestamp).toLocaleDateString()}</div>
+    </div>
 
-  return paragraphs;
+    <!-- Table of Contents -->
+    <div class="toc">
+      <h2>Table of Contents</h2>
+      <ul>
+        <li>1. Problem Breakdown</li>
+        <li>2. Key Stakeholders</li>
+        <li>3. Solution Approach</li>
+        <li>4. Action Plan</li>
+      </ul>
+    </div>
+
+    <!-- Problem Breakdown -->
+    <h2>Problem Breakdown</h2>
+    <div class="section">
+      ${report.problemBreakdown
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => {
+          const escaped = escapeHtml(line);
+          if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
+            return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
+          }
+          if (/^\d+\.\s/.test(escaped.trim())) {
+            return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
+          }
+          if (escaped.trim().endsWith(":")) {
+            return `<div class="heading-item">${escaped}</div>`;
+          }
+          return `<p>${escaped}</p>`;
+        })
+        .join("")}
+    </div>
+
+    <!-- Stakeholders -->
+    <h2>Key Stakeholders</h2>
+    <div class="section">
+      ${report.stakeholders
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => {
+          const escaped = escapeHtml(line);
+          if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
+            return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
+          }
+          if (/^\d+\.\s/.test(escaped.trim())) {
+            return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
+          }
+          if (escaped.trim().endsWith(":")) {
+            return `<div class="heading-item">${escaped}</div>`;
+          }
+          return `<p>${escaped}</p>`;
+        })
+        .join("")}
+    </div>
+
+    <!-- Solution Approach -->
+    <h2>Solution Approach</h2>
+    <div class="section">
+      ${report.solution
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => {
+          const escaped = escapeHtml(line);
+          if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
+            return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
+          }
+          if (/^\d+\.\s/.test(escaped.trim())) {
+            return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
+          }
+          if (escaped.trim().endsWith(":")) {
+            return `<div class="heading-item">${escaped}</div>`;
+          }
+          return `<p>${escaped}</p>`;
+        })
+        .join("")}
+    </div>
+
+    <!-- Action Plan -->
+    <h2>Action Plan</h2>
+    <div class="section">
+      ${report.actionPlan
+        .split("\n")
+        .filter((line) => line.trim())
+        .map((line) => {
+          const escaped = escapeHtml(line);
+          if (escaped.trim().startsWith("•") || escaped.trim().startsWith("-")) {
+            return `<div class="bullet-item">${escaped.replace(/^[•-]\s*/, "")}</div>`;
+          }
+          if (/^\d+\.\s/.test(escaped.trim())) {
+            return `<div class="number-item">${escaped.replace(/^\d+\.\s*/, "")}</div>`;
+          }
+          if (escaped.trim().endsWith(":")) {
+            return `<div class="heading-item">${escaped}</div>`;
+          }
+          return `<p>${escaped}</p>`;
+        })
+        .join("")}
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Generated by AI Planning Agent • Strategic planning made simple</p>
+    </div>
+  </div>
+</body>
+</html>`;
 }
 
 export async function POST(req: Request) {
   try {
-    const { report, problemStatement, timestamp } = await req.json();
+    const { reportData } = await req.json();
+    const { report, problemStatement, timestamp } = reportData;
 
-    const sections = [
-      // Title Page
-      new Paragraph({
-        text: "Strategic Planning Report",
-        heading: HeadingLevel.HEADING_1,
-        alignment: AlignmentType.CENTER,
-        spacing: { before: 600, after: 300 },
-        bold: true,
-      }),
-      new Paragraph({
-        text: problemStatement,
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 400 },
-        italic: true,
-      }),
-      new Paragraph({
-        text: `Generated: ${new Date(timestamp).toLocaleDateString()}`,
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 800 },
-        color: "666666",
-      }),
+    const htmlContent = generateHTMLForPDF(report, problemStatement, timestamp);
 
-      // Table of Contents
-      new Paragraph({
-        text: "Table of Contents",
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 400, after: 200 },
-      }),
-      new Paragraph({
-        text: "1. Problem Breakdown",
-        spacing: { after: 100 },
-      }),
-      new Paragraph({
-        text: "2. Key Stakeholders",
-        spacing: { after: 100 },
-      }),
-      new Paragraph({
-        text: "3. Solution Approach",
-        spacing: { after: 100 },
-      }),
-      new Paragraph({
-        text: "4. Action Plan",
-        spacing: { after: 400 },
-      }),
-
-      // Page break
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true,
-      }),
-
-      // Problem Breakdown Section
-      new Paragraph({
-        text: "Problem Breakdown",
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 200, after: 200 },
-        border: {
-          bottom: {
-            color: "1E40AF",
-            space: 1,
-            style: BorderStyle.SINGLE,
-            size: 12,
-          },
-        },
-      }),
-      ...formatText(report.problemBreakdown),
-
-      // Page break
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true,
-      }),
-
-      // Stakeholders Section
-      new Paragraph({
-        text: "Key Stakeholders",
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 200, after: 200 },
-        border: {
-          bottom: {
-            color: "1E40AF",
-            space: 1,
-            style: BorderStyle.SINGLE,
-            size: 12,
-          },
-        },
-      }),
-      ...formatText(report.stakeholders),
-
-      // Page break
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true,
-      }),
-
-      // Solution Section
-      new Paragraph({
-        text: "Solution Approach",
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 200, after: 200 },
-        border: {
-          bottom: {
-            color: "1E40AF",
-            space: 1,
-            style: BorderStyle.SINGLE,
-            size: 12,
-          },
-        },
-      }),
-      ...formatText(report.solution),
-
-      // Page break
-      new Paragraph({
-        text: "",
-        pageBreakBefore: true,
-      }),
-
-      // Action Plan Section
-      new Paragraph({
-        text: "Action Plan",
-        heading: HeadingLevel.HEADING_2,
-        spacing: { before: 200, after: 200 },
-        border: {
-          bottom: {
-            color: "1E40AF",
-            space: 1,
-            style: BorderStyle.SINGLE,
-            size: 12,
-          },
-        },
-      }),
-      ...formatText(report.actionPlan),
-
-      // Footer
-      new Paragraph({
-        text: "",
-        spacing: { before: 800 },
-      }),
-      new Paragraph({
-        text: "Generated by AI Planning Agent",
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 100 },
-        color: "666666",
-      }),
-      new Paragraph({
-        text: "Strategic planning made simple",
-        alignment: AlignmentType.CENTER,
-        color: "999999",
-      }),
-    ];
-
-    const doc = new Document({
-      sections: [
-        {
-          children: sections,
-          properties: {
-            page: {
-              margins: {
-                top: 1440,
-                right: 1440,
-                bottom: 1440,
-                left: 1440,
-              },
-            },
-          },
-        },
-      ],
-    });
-
-    const buffer = await Packer.toBuffer(doc);
-
-    return new Response(buffer, {
-      headers: {
-        "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "Content-Disposition": `attachment; filename="strategic-report-${Date.now()}.docx"`,
-      },
+    // Return HTML for client-side PDF conversion with html2pdf.js
+    // The client will use html2pdf library to convert this to PDF
+    return NextResponse.json({
+      html: htmlContent,
+      success: true,
     });
   } catch (error) {
-    console.error("DOCX export error:", error);
-    return new Response(JSON.stringify({ error: "Export failed" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("PDF export error:", error);
+    return NextResponse.json(
+      { error: "Export failed", success: false },
+      { status: 500 }
+    );
   }
 }

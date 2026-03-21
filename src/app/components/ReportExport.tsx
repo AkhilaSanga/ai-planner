@@ -31,9 +31,16 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
         }),
       });
 
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
 
       const blob = await response.blob();
+
+      if (blob.size === 0) {
+        throw new Error("Empty file received");
+      }
+
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -42,9 +49,11 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
+
+      alert("✅ DOCX exported successfully!");
     } catch (error) {
-      console.error("Export error:", error);
-      alert("Failed to export DOCX");
+      console.error("DOCX Export error:", error);
+      alert(`❌ Failed to export DOCX: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsExporting(false);
     }
@@ -57,7 +66,6 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          html: reportRef.current?.outerHTML,
           reportData: {
             report,
             problemStatement,
@@ -66,21 +74,51 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
         }),
       });
 
-      if (!response.ok) throw new Error("Export failed");
+      if (!response.ok) {
+        throw new Error(`Export failed: ${response.statusText}`);
+      }
 
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `strategic-report-${Date.now()}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const htmlBlob = await response.blob();
+
+      if (htmlBlob.size === 0) {
+        throw new Error("Empty HTML received");
+      }
+
+      // Convert HTML to PDF using browser's print to PDF
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const htmlContent = e.target?.result as string;
+
+        // Create an iframe to print
+        const iframe = document.createElement("iframe");
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+
+        const doc = iframe.contentDocument;
+        if (doc) {
+          doc.open();
+          doc.write(htmlContent);
+          doc.close();
+
+          // Wait a moment for content to load, then print
+          setTimeout(() => {
+            iframe.contentWindow?.print();
+
+            // Clean up after a delay
+            setTimeout(() => {
+              document.body.removeChild(iframe);
+              setIsExporting(false);
+            }, 1000);
+          }, 500);
+        }
+      };
+
+      reader.readAsText(htmlBlob);
+
+      alert("✅ PDF print dialog opened! Select 'Save as PDF' to download.");
     } catch (error) {
-      console.error("Export error:", error);
-      alert("Failed to export PDF");
-    } finally {
+      console.error("PDF Export error:", error);
+      alert(`❌ Failed to export PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
       setIsExporting(false);
     }
   };
@@ -90,16 +128,16 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       <button
         onClick={handleExportDocx}
         disabled={isExporting}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
       >
-        {isExporting ? "..." : "📄 Export DOCX"}
+        {isExporting ? "Exporting..." : "📄 Export DOCX"}
       </button>
       <button
         onClick={handleExportPdf}
         disabled={isExporting}
-        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
+        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
       >
-        {isExporting ? "..." : "📕 Export PDF"}
+        {isExporting ? "Exporting..." : "📕 Export PDF"}
       </button>
     </div>
   );
