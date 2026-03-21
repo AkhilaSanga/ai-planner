@@ -50,14 +50,14 @@ export default function Section({ title, content, onUpdate }: Props) {
     const lines = text.split("\n").filter((line) => line.trim());
 
     return (
-      <div className="space-y-4 text-slate-700">
+      <div className="space-y-3 sm:space-y-4">
         {lines.map((line, idx) => {
           // Bullet points
           if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
             return (
-              <div key={idx} className="flex gap-3 items-start">
-                <span className="text-blue-600 font-bold mt-0.5 flex-shrink-0">•</span>
-                <span className="pt-0.5">{line.replace(/^[•-]\s*/, "")}</span>
+              <div key={idx} className="flex gap-3 items-start text-gray-700 text-sm sm:text-base leading-relaxed">
+                <span className="text-gray-900 font-semibold flex-shrink-0 mt-0.5">•</span>
+                <span>{line.replace(/^[•-]\s*/, "")}</span>
               </div>
             );
           }
@@ -67,18 +67,18 @@ export default function Section({ title, content, onUpdate }: Props) {
             const match = line.match(/^(\d+)\.\s(.+)$/);
             if (match) {
               return (
-                <div key={idx} className="flex gap-3 items-start">
-                  <span className="font-bold text-blue-600 min-w-8 flex-shrink-0">{match[1]}.</span>
-                  <span className="pt-0.5">{match[2]}</span>
+                <div key={idx} className="flex gap-3 items-start text-gray-700 text-sm sm:text-base leading-relaxed">
+                  <span className="text-gray-900 font-semibold min-w-6 flex-shrink-0">{match[1]}.</span>
+                  <span>{match[2]}</span>
                 </div>
               );
             }
           }
 
           // Bold headings (text ending with :)
-          if (line.trim().endsWith(":") && line.trim().length > 2) {
+          if (line.trim().endsWith(":")) {
             return (
-              <p key={idx} className="font-bold text-slate-900 mt-4 mb-2 text-lg">
+              <p key={idx} className="font-semibold text-gray-900 mt-3 sm:mt-4 mb-2 text-sm sm:text-base">
                 {line}
               </p>
             );
@@ -86,7 +86,7 @@ export default function Section({ title, content, onUpdate }: Props) {
 
           // Regular paragraphs
           return (
-            <p key={idx} className="leading-relaxed text-slate-700">
+            <p key={idx} className="text-gray-700 text-sm sm:text-base leading-relaxed">
               {line}
             </p>
           );
@@ -96,29 +96,29 @@ export default function Section({ title, content, onUpdate }: Props) {
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-8 shadow-sm hover:shadow-md transition-shadow print:page-break-inside-avoid">
+    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow print:page-break-inside-avoid">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-slate-900">{title}</h3>
+      <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3 flex-col sm:flex-row">
+        <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{title}</h3>
         {!isEditing && onUpdate && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
             <button
               onClick={() => handleRefine("Make this more detailed and comprehensive, add more context")}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 disabled:opacity-50 transition-colors font-medium"
+              className="px-3 py-1.5 text-xs sm:text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors font-medium whitespace-nowrap"
             >
               {isLoading ? "..." : "✨ Detailed"}
             </button>
             <button
               onClick={() => handleRefine("Shorten this significantly while keeping all key points")}
               disabled={isLoading}
-              className="px-3 py-1 text-sm bg-amber-50 text-amber-700 rounded-md hover:bg-amber-100 disabled:opacity-50 transition-colors font-medium"
+              className="px-3 py-1.5 text-xs sm:text-sm bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors font-medium whitespace-nowrap"
             >
               {isLoading ? "..." : "⚡ Shorten"}
             </button>
             <button
               onClick={() => setIsEditing(true)}
-              className="px-3 py-1 text-sm bg-slate-100 text-slate-700 rounded-md hover:bg-slate-200 transition-colors font-medium"
+              className="px-3 py-1.5 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium whitespace-nowrap"
             >
               ✏️ Edit
             </button>
@@ -127,7 +127,7 @@ export default function Section({ title, content, onUpdate }: Props) {
       </div>
 
       {/* Divider */}
-      <div className="h-1 bg-gradient-to-r from-blue-500 to-transparent mb-6"></div>
+      <div className="h-px bg-gradient-to-r from-gray-200 to-transparent mb-4 sm:mb-6"></div>
 
       {/* Content View */}
       {!isEditing && <div className="print:text-xs">{renderContent(content)}</div>}
@@ -138,19 +138,20 @@ export default function Section({ title, content, onUpdate }: Props) {
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="w-full border border-slate-300 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-slate-700"
+            className="w-full border border-gray-300 rounded-lg p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-gray-700"
             rows={10}
+            placeholder="Edit the content here..."
           />
           <div className="flex gap-2 justify-end">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 text-sm bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
+              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
             >
               Save Changes
             </button>

@@ -124,20 +124,34 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 flex-col sm:flex-row w-full sm:w-auto">
       <button
         onClick={handleExportDocx}
         disabled={isExporting}
-        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
+        className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base whitespace-nowrap"
       >
-        {isExporting ? "Exporting..." : "📄 Export DOCX"}
+        {isExporting ? (
+          <>
+            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span className="hidden sm:inline">Exporting...</span>
+          </>
+        ) : (
+          "📄 DOCX"
+        )}
       </button>
       <button
         onClick={handleExportPdf}
         disabled={isExporting}
-        className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center gap-2 transition-colors"
+        className="px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base whitespace-nowrap"
       >
-        {isExporting ? "Exporting..." : "📕 Export PDF"}
+        {isExporting ? (
+          <>
+            <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span className="hidden sm:inline">Exporting...</span>
+          </>
+        ) : (
+          "📕 PDF"
+        )}
       </button>
     </div>
   );

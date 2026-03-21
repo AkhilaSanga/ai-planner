@@ -82,46 +82,43 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
+    <main className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
-            🚀 AI Planning Agent
+      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+            AI Planning Agent
           </h1>
-          <p className="text-slate-600 text-sm mt-2">
-            Generate structured reports and actionable plans powered by AI
+          <p className="text-gray-600 text-sm mt-1">
+            Generate strategic reports with AI-powered analysis
           </p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Input Section */}
         <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
 
         {/* Error State */}
         {error && (
-          <div className="mt-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 flex items-center gap-3">
-            <span className="text-xl">⚠️</span>
-            <div>
-              <p className="font-semibold">Error</p>
-              <p className="text-sm">{error}</p>
-            </div>
+          <div className="mt-6 sm:mt-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            <p className="font-medium">⚠️ Error</p>
+            <p className="mt-1">{error}</p>
           </div>
         )}
 
         {/* Loading State */}
         {isLoading && (
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center py-12">
             <div className="inline-flex flex-col items-center gap-4">
-              <div className="flex gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+              <div className="flex gap-1.5">
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
               </div>
               <div>
-                <p className="text-slate-600 font-medium">Generating your strategic report...</p>
-                <p className="text-slate-500 text-sm mt-1">This may take 30-60 seconds</p>
+                <p className="text-gray-900 font-medium text-sm">Generating your strategic report...</p>
+                <p className="text-gray-500 text-xs mt-1">This may take 30-60 seconds</p>
               </div>
             </div>
           </div>
@@ -130,37 +127,36 @@ export default function Home() {
         {/* Report Section */}
         {report && !isLoading && (
           <div className="mt-12">
-            {/* Report Header */}
-            <div className="mb-10">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-3xl font-bold text-slate-900">📋 Strategic Report</h2>
-                  <p className="text-slate-600 mt-2">
-                    Problem: <span className="font-medium text-slate-900">{problemStatement}</span>
-                  </p>
-                </div>
-                <div className="flex gap-3">
-                  <ReportExport report={report} problemStatement={problemStatement} reportRef={reportRef} />
-                </div>
+            {/* Report Header with Export Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+              <div className="flex-1">
+                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Strategic Report</h2>
+                <p className="text-gray-600 text-sm mt-2">
+                  Challenge: <span className="font-medium text-gray-900">{problemStatement}</span>
+                </p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <ReportExport report={report} problemStatement={problemStatement} reportRef={reportRef} />
               </div>
             </div>
 
             {/* Report Content */}
-            <div ref={reportRef} className="space-y-6 print:space-y-4">
+            <div ref={reportRef} className="space-y-8 sm:space-y-10">
               {/* Cover Section */}
-              <div className="bg-white rounded-xl border-2 border-blue-600 p-10 text-center mb-8 print:page-break-after">
-                <div className="inline-block mb-4">
-                  <div className="text-5xl mb-4">📊</div>
-                </div>
-                <h1 className="text-4xl font-bold text-slate-900 mb-4">Strategic Planning Report</h1>
-                <p className="text-xl text-slate-600 mb-8 max-w-2xl mx-auto">{problemStatement}</p>
-                <div className="text-sm text-slate-500">
-                  Generated: {new Date().toLocaleDateString("en-US", { 
+              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 sm:p-10 text-center mb-8">
+                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                  Strategic Planning Report
+                </h3>
+                <p className="text-base sm:text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
+                  {problemStatement}
+                </p>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Generated {new Date().toLocaleDateString("en-US", { 
                     year: "numeric", 
                     month: "long", 
                     day: "numeric" 
                   })}
-                </div>
+                </p>
               </div>
 
               {/* Problem Breakdown */}
@@ -190,20 +186,20 @@ export default function Home() {
                 content={report.actionPlan}
                 onUpdate={(val) => updateSection("actionPlan", val)}
               />
-
-              {/* Footer */}
-              <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-8 mt-10 print:page-break-before">
-                <p className="text-sm">Generated by AI Planning Agent • Strategic planning made simple</p>
-              </div>
             </div>
           </div>
         )}
 
         {/* Empty State */}
         {!report && !isLoading && (
-          <div className="mt-12 text-center py-20">
-            <div className="text-6xl mb-4">🎯</div>
-            <p className="text-xl text-slate-600">Enter a problem statement to generate a strategic report</p>
+          <div className="mt-16 text-center py-16 sm:py-20">
+            <div className="text-5xl sm:text-6xl mb-4">🎯</div>
+            <p className="text-lg sm:text-xl text-gray-600">
+              Enter a problem statement to generate a strategic report
+            </p>
+            <p className="text-gray-500 text-sm mt-3">
+              Our AI will analyze and provide actionable insights
+            </p>
           </div>
         )}
       </div>

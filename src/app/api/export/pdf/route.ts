@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const { reportData } = await req.json();
     const { report, problemStatement, timestamp } = reportData;
 
-    // Generate HTML content with proper numbering
+    // Generate HTML content
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -26,146 +26,137 @@ export async function POST(req: Request) {
       padding: 0;
       box-sizing: border-box;
     }
-
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-      line-height: 1.7;
-      color: #1f2937;
-      background: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: white;
       padding: 40px 20px;
     }
-
+    
     .container {
       max-width: 900px;
       margin: 0 auto;
     }
-
+    
     .cover {
       text-align: center;
       padding: 60px 20px;
-      border-bottom: 3px solid #2563eb;
-      margin-bottom: 50px;
-      page-break-after: always;
+      border-bottom: 3px solid #1e40af;
+      margin-bottom: 60px;
     }
-
+    
     .cover h1 {
       color: #1e40af;
       font-size: 36px;
-      margin-bottom: 25px;
       font-weight: 700;
-      letter-spacing: -0.5px;
+      margin-bottom: 25px;
+      line-height: 1.3;
     }
-
-    .cover .problem {
-      font-size: 18px;
-      color: #374151;
-      margin-bottom: 20px;
-      font-weight: 500;
+    
+    .cover p {
+      font-size: 16px;
+      color: #555;
+      margin: 15px 0;
       line-height: 1.6;
     }
-
+    
     .cover .timestamp {
       font-size: 13px;
-      color: #9ca3af;
+      color: #999;
       margin-top: 20px;
     }
-
+    
     .section {
       margin-bottom: 50px;
       page-break-inside: avoid;
     }
-
+    
     .section h2 {
       color: #1e40af;
       font-size: 24px;
       font-weight: 700;
-      border-bottom: 2px solid #2563eb;
+      border-bottom: 2px solid #1e40af;
       padding-bottom: 12px;
       margin-bottom: 25px;
+      margin-top: 40px;
       page-break-after: avoid;
-      letter-spacing: -0.3px;
     }
-
+    
     .section-content {
-      margin-left: 20px;
+      margin-top: 15px;
     }
-
-    .paragraph {
-      margin-bottom: 16px;
-      color: #374151;
-      line-height: 1.8;
-      font-size: 15px;
-    }
-
+    
     .bullet-item {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 14px;
-      align-items: flex-start;
-      color: #374151;
+      margin-left: 0;
+      margin-bottom: 15px;
+      padding-left: 24px;
+      position: relative;
       line-height: 1.7;
       font-size: 15px;
     }
-
+    
     .bullet-item::before {
       content: "•";
-      color: #2563eb;
+      color: #1e40af;
       font-weight: bold;
-      font-size: 18px;
-      flex-shrink: 0;
-      margin-top: -2px;
-      line-height: 1;
+      font-size: 20px;
+      position: absolute;
+      left: 0;
+      top: -2px;
     }
-
+    
+    .number-item {
+      margin-left: 0;
+      margin-bottom: 16px;
+      padding-left: 28px;
+      position: relative;
+      line-height: 1.7;
+      font-size: 15px;
+      counter-increment: item;
+    }
+    
+    .number-item::before {
+      content: counter(item) ".";
+      color: #1e40af;
+      font-weight: bold;
+      position: absolute;
+      left: 0;
+      min-width: 24px;
+    }
+    
     .heading-item {
-      font-size: 16px;
-      font-weight: 600;
-      color: #111827;
+      font-weight: 700;
       margin-top: 20px;
       margin-bottom: 12px;
+      color: #333;
+      font-size: 15px;
       page-break-after: avoid;
     }
-
-    /* Fix numbering - Reset counter for each section */
-    .section {
-      counter-reset: item;
-    }
-
-    .number-item {
-      display: flex;
-      gap: 14px;
-      margin-bottom: 14px;
-      align-items: flex-start;
-      color: #374151;
+    
+    .paragraph {
+      margin-bottom: 15px;
       line-height: 1.7;
       font-size: 15px;
     }
-
-    .number-item::before {
-      content: counter(item) ".";
-      counter-increment: item;
-      color: #2563eb;
-      font-weight: 600;
-      font-size: 15px;
-      flex-shrink: 0;
-      min-width: 22px;
-      text-align: right;
-    }
-
+    
     .footer {
       margin-top: 80px;
-      padding-top: 20px;
-      border-top: 1px solid #e5e7eb;
+      padding-top: 30px;
+      border-top: 1px solid #ddd;
       text-align: center;
-      color: #9ca3af;
+      color: #999;
       font-size: 12px;
-      page-break-before: avoid;
     }
-
+    
     @media print {
       body {
-        padding: 0;
-        background: white;
+        margin: 0;
+        padding: 20px;
+      }
+      .container {
+        max-width: 100%;
       }
       .section {
         page-break-inside: avoid;
@@ -173,58 +164,48 @@ export async function POST(req: Request) {
       .section h2 {
         page-break-after: avoid;
       }
-      .cover {
-        page-break-after: always;
+      .heading-item {
+        page-break-after: avoid;
       }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- Title Page -->
     <div class="cover">
       <h1>Strategic Planning Report</h1>
-      <p class="problem">${escapeHtml(problemStatement)}</p>
-      <p class="timestamp">Generated: ${new Date(timestamp).toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })}</p>
+      <p><strong>${escapeHtml(problemStatement)}</strong></p>
+      <p class="timestamp">Generated: ${new Date(timestamp).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
     </div>
 
-    <!-- Problem Breakdown -->
     <div class="section">
       <h2>Problem Breakdown</h2>
       <div class="section-content">
-        ${formatContent(report.problemBreakdown)}
+        ${formatContent(report.problemBreakdown, 'problem')}
       </div>
     </div>
 
-    <!-- Key Stakeholders -->
     <div class="section">
       <h2>Key Stakeholders</h2>
       <div class="section-content">
-        ${formatContent(report.stakeholders)}
+        ${formatContent(report.stakeholders, 'stakeholders')}
       </div>
     </div>
 
-    <!-- Solution Approach -->
     <div class="section">
       <h2>Solution Approach</h2>
       <div class="section-content">
-        ${formatContent(report.solution)}
+        ${formatContent(report.solution, 'solution')}
       </div>
     </div>
 
-    <!-- Action Plan -->
     <div class="section">
       <h2>Action Plan</h2>
-      <div class="section-content">
-        ${formatContent(report.actionPlan)}
+      <div class="section-content" style="counter-reset: item;">
+        ${formatContent(report.actionPlan, 'action')}
       </div>
     </div>
 
-    <!-- Footer -->
     <div class="footer">
       <p>Generated by AI Planning Agent • Strategic planning made simple</p>
     </div>
@@ -233,6 +214,7 @@ export async function POST(req: Request) {
 </html>
     `;
 
+    // Return the HTML as a blob that can be converted to PDF on client
     return new Response(htmlContent, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
@@ -259,9 +241,10 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m]);
 }
 
-function formatContent(content: string): string {
+function formatContent(content: string, type: string): string {
   const lines = content.split("\n").filter((line) => line.trim());
   let html = "";
+  let numberCounter = 1;
 
   for (const line of lines) {
     const trimmed = line.trim();

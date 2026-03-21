@@ -1,3 +1,5 @@
+export const runtime = "nodejs";
+
 import { callAI } from "@/lib/ai";
 
 export async function POST(req: Request) {
