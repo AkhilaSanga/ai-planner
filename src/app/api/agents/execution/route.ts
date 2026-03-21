@@ -11,10 +11,10 @@ Convert the input into a structured business report.
 Return ONLY JSON in this format:
 
 {
-  "problemBreakdown": "text",
-  "stakeholders": "text",
-  "solution": "text",
-  "actionPlan": "text"
+  "problemBreakdown": "...",
+  "stakeholders": "...",
+  "solution": "...",
+  "actionPlan": "..."
 }
 
 Input:
@@ -29,12 +29,12 @@ ${insightOutput}
     parsed = JSON.parse(raw);
   } catch {
     parsed = {
-      problemBreakdown: raw,
-      stakeholders: "",
-      solution: "",
-      actionPlan: "",
+      problemBreakdown: raw || "No data",
+      stakeholders: "Not generated",
+      solution: "Not generated",
+      actionPlan: "Not generated",
     };
   }
-  
-  return Response.json({ data: raw });
+
+  return Response.json({ data: parsed });
 }

@@ -2,19 +2,20 @@ import axios from "axios";
 
 const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 
+console.log("ENV KEY:", process.env.GROQ_API_KEY);
 export async function callAI(prompt: string) {
   try {
     const response = await axios.post(
       GROQ_URL,
       {
-        model: "llama3-8b-8192",
+        model: "llama-3.1-8b-instant",
         messages: [
           {
             role: "user",
             content: prompt,
           },
         ],
-        temperature: 0.7,
+        temperature: 0.3,
       },
       {
         headers: {
@@ -25,8 +26,15 @@ export async function callAI(prompt: string) {
     );
 
     return response.data.choices[0].message.content;
-  } catch (error) {
-    console.error("AI Error:", error);
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      console.error("❌ GROQ ERROR:", error.response?.data || error.message);
+    } else if (error instanceof Error) {
+      console.error("❌ ERROR:", error.message);
+    } else {
+      console.error("❌ UNKNOWN ERROR:", error);
+    }
+
     return "Error generating response";
   }
 }
