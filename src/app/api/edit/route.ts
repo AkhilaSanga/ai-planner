@@ -3,21 +3,32 @@ import { callAI } from "@/lib/ai";
 export async function POST(req: Request) {
   const { content, instruction } = await req.json();
 
-  const prompt = `
-You are an AI editor.
+  if (!content || !instruction) {
+    return Response.json(
+      { error: "Missing content or instruction" },
+      { status: 400 }
+    );
+  }
 
-Edit the following content based on instruction.
+  const prompt = `You are a helpful AI editor.
 
-Instruction:
-${instruction}
+Edit the following content based on the user's instruction.
+
+Instruction: ${instruction}
 
 Content:
 ${content}
 
-Return only the improved text.
-`;
+Return only the edited text. No explanations, no markdown, just the improved content.`;
 
-  const result = await callAI(prompt);
-
-  return Response.json({ data: result });
+  try {
+    const result = await callAI(prompt);
+    return Response.json({ data: result });
+  } catch (error) {
+    console.error("Edit error:", error);
+    return Response.json(
+      { error: "Failed to edit content" },
+      { status: 500 }
+    );
+  }
 }

@@ -3,57 +3,62 @@ import { callAI } from "@/lib/ai";
 export async function POST(req: Request) {
   const { insightOutput } = await req.json();
 
-  const prompt = `
-You are an execution agent.
+  const prompt = `You are an execution agent. Generate a structured report based on the insights below.
 
-Return ONLY valid JSON. No markdown. No code blocks.
+${insightOutput}
 
-IMPORTANT:
-- All fields MUST be plain strings (no objects, no arrays)
-- Do NOT use \`\`\`json or formatting
-
-Format:
+Return ONLY a JSON object with these exact fields (all as plain text strings):
 {
-  "problemBreakdown": "Explain in clear paragraphs",
-  "stakeholders": "List stakeholders in text format",
-  "solution": "Explain solution clearly",
-  "actionPlan": "Step-by-step plan in text"
+  "problemBreakdown": "Detailed explanation of the problem using bullet points (• format)",
+  "stakeholders": "List of stakeholders involved, describe their roles",
+  "solution": "Comprehensive solution approach with clear steps",
+  "actionPlan": "Numbered action items (1. 2. 3. format)"
 }
 
-Input:
-${insightOutput}
-`;
+CRITICAL:
+- Return ONLY valid JSON
+- No markdown code blocks
+- No extra text before or after JSON
+- All fields must be plain text strings
+- Use \\n for line breaks in the JSON strings
+- Use • for bullet points
+- Use 1. 2. 3. for numbered lists`;
 
   let raw = await callAI(prompt);
 
-  // ✅ Remove markdown if AI still sends it
-  raw = raw.replace(/```json|```/g, "").trim();
-
-  let parsed;
-
-  try {
-    // Remove markdown if present
-  let cleaned = raw.replace(/```json|```/g, "").trim();
-
-  // Extract only JSON part (important fix)
-  const start = cleaned.indexOf("{");
-  const end = cleaned.lastIndexOf("}");
-
-  if (start !== -1 && end !== -1) {
-    cleaned = cleaned.substring(start, end + 1);
+  // Clean up response
+  raw = raw.trim();
+  raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "");
+  
+  // Extract JSON if there's extra text
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  if (jsonMatch) {
+    raw = jsonMatch[0];
   }
 
-  parsed = JSON.parse(cleaned);
-} catch (e) {
-  console.log("❌ JSON Parse Failed:", raw);
-
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (error) {
+    console.error("JSON Parse Error:", error);
+    console.error("Raw:", raw.substring(0, 300));
+    
+    // Fallback to structured but unparseable response
     parsed = {
-      problemBreakdown: raw, // return raw text if parsing fails
-      stakeholders: "Not generated",
-      solution: "Not generated",
-      actionPlan: "Not generated",
+      problemBreakdown: raw || "Unable to parse response",
+      stakeholders: "See problem breakdown",
+      solution: "See problem breakdown",
+      actionPlan: "See problem breakdown",
     };
   }
 
-  return Response.json({ data: parsed });
+  // Validate all fields are strings
+  const validated = {
+    problemBreakdown: String(parsed.problemBreakdown || ""),
+    stakeholders: String(parsed.stakeholders || ""),
+    solution: String(parsed.solution || ""),
+    actionPlan: String(parsed.actionPlan || ""),
+  };
+
+  return Response.json({ data: validated });
 }
