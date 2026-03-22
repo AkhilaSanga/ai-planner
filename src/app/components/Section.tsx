@@ -8,6 +8,14 @@ type Props = {
   onUpdate?: (value: string) => void;
 };
 
+// Edit instructions for each section
+const EDIT_INSTRUCTIONS: { [key: string]: string } = {
+  "📋 Problem Breakdown": "Format: Use bullet points (•) to list each problem or issue. Be specific and concise.",
+  "👥 Key Stakeholders": "Format: Use bullet points (•) to list stakeholders. Include role and expectations.\nExample: • Customers: Expect excellent service",
+  "💡 Solution Approach": "Format: Use bullet points (•) for solution strategies. Explain how each approach addresses the problems.\nExample: • Strategy: Implementation method and benefits",
+  "🎯 Action Plan": "Format: Use numbered steps (1. 2. 3.) in chronological order.\nExample:\n1. First step and timeline\n2. Second step and timeline\n3. Third step and timeline",
+};
+
 export default function Section({ title, content, onUpdate }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(content);
@@ -130,6 +138,15 @@ export default function Section({ title, content, onUpdate }: Props) {
       {/* Edit Mode */}
       {isEditing && onUpdate && (
         <div className="space-y-4">
+          {/* Edit Instructions */}
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+            <p className="text-sm text-blue-900 font-semibold mb-2">📝 Edit Instructions:</p>
+            <p className="text-sm text-blue-800 whitespace-pre-wrap">
+              {EDIT_INSTRUCTIONS[title] || "Edit this section and save your changes."}
+            </p>
+          </div>
+
+          {/* Textarea */}
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
@@ -137,6 +154,8 @@ export default function Section({ title, content, onUpdate }: Props) {
             rows={12}
             placeholder="Edit the content here..."
           />
+
+          {/* Action Buttons */}
           <div className="flex gap-3 justify-end">
             <button
               onClick={handleCancel}

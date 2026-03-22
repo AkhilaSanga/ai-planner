@@ -31,6 +31,7 @@ export default function Home() {
     setProblemStatement(input);
 
     try {
+      // 1. Planner
       const plannerRes = await fetch("/api/agents/planner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -40,6 +41,7 @@ export default function Home() {
       if (!plannerRes.ok) throw new Error("Planner agent failed");
       const plannerData = await plannerRes.json();
 
+      // 2. Insight
       const insightRes = await fetch("/api/agents/insight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -49,6 +51,7 @@ export default function Home() {
       if (!insightRes.ok) throw new Error("Insight agent failed");
       const insightData = await insightRes.json();
 
+      // 3. Execution
       const execRes = await fetch("/api/agents/execution", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,9 +82,9 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+      <header className="border-b border-gray-200 sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             AI Planning Agent
@@ -90,9 +93,10 @@ export default function Home() {
             Generate strategic reports with AI-powered analysis
           </p>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      {/* Main Content */}
+      <div className="flex-1 max-w-6xl mx-auto w-full px-6 py-12">
         {/* Input Section */}
         <div className="mb-12">
           <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
@@ -222,6 +226,13 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto px-6 py-8 text-center text-gray-600 text-sm">
+          <p>© 2026 Akhila Sanga | AI Planning Agent | Version v1.1.0</p>
+        </div>
+      </footer>
     </main>
   );
 }
