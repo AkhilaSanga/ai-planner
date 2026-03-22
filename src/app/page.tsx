@@ -31,7 +31,6 @@ export default function Home() {
     setProblemStatement(input);
 
     try {
-      // 1. Planner
       const plannerRes = await fetch("/api/agents/planner", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -41,7 +40,6 @@ export default function Home() {
       if (!plannerRes.ok) throw new Error("Planner agent failed");
       const plannerData = await plannerRes.json();
 
-      // 2. Insight
       const insightRes = await fetch("/api/agents/insight", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,7 +49,6 @@ export default function Home() {
       if (!insightRes.ok) throw new Error("Insight agent failed");
       const insightData = await insightRes.json();
 
-      // 3. Execution
       const execRes = await fetch("/api/agents/execution", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -82,11 +79,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 flex flex-col">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
-      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             AI Planning Agent
           </h1>
           <p className="text-gray-600 text-sm mt-1">
@@ -95,31 +92,45 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Input Section */}
-        <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
+        <div className="mb-12">
+          <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
+        </div>
 
         {/* Error State */}
         {error && (
-          <div className="mt-6 sm:mt-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-pulse">
-            <p className="font-medium">⚠️ Error</p>
-            <p className="mt-1">{error}</p>
+          <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-2xl text-red-700 shadow-sm">
+            <p className="font-semibold text-lg">⚠️ Error</p>
+            <p className="mt-2">{error}</p>
           </div>
         )}
 
         {/* Loading State */}
         {isLoading && (
-          <div className="mt-12 text-center py-12">
-            <div className="inline-flex flex-col items-center gap-4">
-              <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+          <div className="my-20 text-center py-20">
+            <div className="inline-flex flex-col items-center gap-6">
+              <div className="flex gap-3">
+                <div
+                  className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0s" }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+                <div
+                  className="w-3 h-3 bg-blue-600 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.4s" }}
+                ></div>
               </div>
               <div>
-                <p className="text-gray-900 font-medium text-sm">Generating your strategic report...</p>
-                <p className="text-gray-500 text-xs mt-1">This may take 30-60 seconds</p>
+                <p className="text-gray-900 font-bold text-lg">
+                  Generating your strategic report...
+                </p>
+                <p className="text-gray-500 text-sm mt-2">
+                  This may take 30-60 seconds
+                </p>
               </div>
             </div>
           </div>
@@ -129,33 +140,40 @@ export default function Home() {
         {report && !isLoading && (
           <div className="mt-12">
             {/* Report Header with Export Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
-              <div className="flex-1">
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Strategic Report</h2>
-                <p className="text-gray-600 text-sm mt-2">
-                  Challenge: <span className="font-medium text-gray-900">{problemStatement}</span>
+            <div className="mb-10">
+              <div className="mb-6">
+                <h2 className="text-3xl font-bold text-gray-900 mb-3">
+                  Strategic Report
+                </h2>
+                <p className="text-gray-700 text-base">
+                  <span className="font-semibold">Challenge:</span> {problemStatement}
                 </p>
               </div>
-              <div className="flex gap-2 flex-shrink-0 flex-col sm:flex-row">
-                <ReportExport report={report} problemStatement={problemStatement} reportRef={reportRef} />
+              <div className="flex flex-wrap gap-4">
+                <ReportExport
+                  report={report}
+                  problemStatement={problemStatement}
+                  reportRef={reportRef}
+                />
               </div>
             </div>
 
             {/* Report Content */}
-            <div ref={reportRef} className="space-y-8 sm:space-y-10">
+            <div ref={reportRef} className="space-y-8">
               {/* Cover Section */}
-              <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border border-blue-200 rounded-xl p-6 sm:p-10 text-center mb-8 shadow-md">
-                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+              <div className="bg-gradient-to-br from-white to-blue-50 border border-blue-200 rounded-3xl p-12 text-center shadow-lg hover:shadow-xl transition-shadow">
+                <h3 className="text-5xl font-bold text-gray-900 mb-6">
                   Strategic Planning Report
                 </h3>
-                <p className="text-base sm:text-lg text-gray-700 mb-4 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-xl text-gray-700 mb-8 max-w-4xl mx-auto leading-relaxed">
                   {problemStatement}
                 </p>
-                <p className="text-xs sm:text-sm text-gray-500">
-                  Generated {new Date().toLocaleDateString("en-US", { 
-                    year: "numeric", 
-                    month: "long", 
-                    day: "numeric" 
+                <p className="text-gray-500 text-sm">
+                  Generated{" "}
+                  {new Date().toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
                   })}
                 </p>
               </div>
@@ -193,26 +211,17 @@ export default function Home() {
 
         {/* Empty State */}
         {!report && !isLoading && (
-          <div className="mt-16 text-center py-16 sm:py-20">
-            <div className="text-5xl sm:text-6xl mb-4">🎯</div>
-            <p className="text-lg sm:text-xl text-gray-600 font-medium">
-              Enter a problem statement to generate a strategic report
-            </p>
-            <p className="text-gray-500 text-sm mt-3">
-              Our AI will analyze and provide actionable insights
+          <div className="my-24 text-center py-24">
+            <div className="text-7xl mb-8">🚀</div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              Enter a problem statement
+            </h2>
+            <p className="text-gray-600 text-lg">
+              Our AI will generate a comprehensive analysis and action plan
             </p>
           </div>
         )}
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-gray-200 bg-white/50 backdrop-blur-sm mt-8">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
-          <p className="text-gray-600 text-xs sm:text-sm">
-            © 2026 Akhila Sanga | AI Planning Agent | Version v1.1.0
-          </p>
-        </div>
-      </footer>
     </main>
   );
 }

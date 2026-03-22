@@ -15,9 +15,7 @@ export default function Section({ title, content, onUpdate }: Props) {
 
   const handleSave = () => {
     if (onUpdate) {
-      // Preserve formatting - ensure bullets and numbers are maintained
-      const saved = preserveFormatting(editValue);
-      onUpdate(saved);
+      onUpdate(editValue);
     }
     setIsEditing(false);
   };
@@ -36,89 +34,54 @@ export default function Section({ title, content, onUpdate }: Props) {
         body: JSON.stringify({ content, instruction }),
       });
       const data = await res.json();
-      // Ensure formatted response maintains bullets/numbers
-      const formatted = preserveFormatting(data.data);
-      setEditValue(formatted);
+      setEditValue(data.data);
       if (onUpdate) {
-        onUpdate(formatted);
+        onUpdate(data.data);
       }
     } catch (error) {
       console.error("Error refining content:", error);
-      alert("Failed to refine content. Please try again.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Preserve bullet and numbering formatting
-  const preserveFormatting = (text: string): string => {
-    const lines = text.split("\n");
-    return lines
-      .map((line) => {
-        const trimmed = line.trim();
-        
-        // Already has bullet
-        if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
-          return trimmed.startsWith("•") ? trimmed : "• " + trimmed.substring(2);
-        }
-        
-        // Already has number
-        if (/^\d+\.\s/.test(trimmed)) {
-          return trimmed;
-        }
-        
-        // Empty or heading
-        if (!trimmed || trimmed.endsWith(":")) {
-          return trimmed;
-        }
-        
-        return trimmed;
-      })
-      .join("\n");
-  };
-
-  // Render structured content (lists, paragraphs, etc.)
   const renderContent = (text: string) => {
     const lines = text.split("\n").filter((line) => line.trim());
 
     return (
-      <div className="space-y-3 sm:space-y-4">
+      <div className="space-y-3">
         {lines.map((line, idx) => {
-          // Bullet points
           if (line.trim().startsWith("•") || line.trim().startsWith("-")) {
             return (
-              <div key={idx} className="flex gap-3 items-start text-gray-700 text-sm sm:text-base leading-relaxed">
-                <span className="text-gray-900 font-semibold flex-shrink-0 mt-0.5">•</span>
+              <div key={idx} className="flex gap-3 items-start text-gray-700 text-base leading-relaxed">
+                <span className="text-blue-600 font-bold flex-shrink-0 mt-0.5">•</span>
                 <span>{line.replace(/^[•-]\s*/, "")}</span>
               </div>
             );
           }
 
-          // Numbered steps
           if (/^\d+\.\s/.test(line.trim())) {
             const match = line.match(/^(\d+)\.\s(.+)$/);
             if (match) {
               return (
-                <div key={idx} className="flex gap-3 items-start text-gray-700 text-sm sm:text-base leading-relaxed">
-                  <span className="text-gray-900 font-semibold min-w-6 flex-shrink-0">{match[1]}.</span>
+                <div key={idx} className="flex gap-3 items-start text-gray-700 text-base leading-relaxed">
+                  <span className="text-blue-600 font-bold min-w-8 flex-shrink-0">{match[1]}.</span>
                   <span>{match[2]}</span>
                 </div>
               );
             }
           }
 
-          // Bold headings (text ending with :)
           if (line.trim().endsWith(":")) {
             return (
-              <p key={idx} className="font-semibold text-gray-900 mt-3 sm:mt-4 mb-2 text-sm sm:text-base">
+              <p key={idx} className="font-bold text-gray-900 mt-5 mb-3 text-base">
                 {line}
               </p>
             );
           }
 
-          // Regular paragraphs
           return (
-            <p key={idx} className="text-gray-700 text-sm sm:text-base leading-relaxed">
+            <p key={idx} className="text-gray-700 text-base leading-relaxed">
               {line}
             </p>
           );
@@ -128,29 +91,29 @@ export default function Section({ title, content, onUpdate }: Props) {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 lg:p-8 shadow-sm hover:shadow-md transition-shadow print:page-break-inside-avoid">
+    <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow print:page-break-inside-avoid">
       {/* Header */}
-      <div className="flex items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3 flex-col sm:flex-row">
-        <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold text-gray-900">{title}</h3>
+      <div className="flex items-start justify-between mb-6 gap-4">
+        <h3 className="text-2xl font-bold text-gray-900">{title}</h3>
         {!isEditing && onUpdate && (
-          <div className="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+          <div className="flex gap-2 flex-wrap justify-end">
             <button
               onClick={() => handleRefine("Make this more detailed and comprehensive, add more context")}
               disabled={isLoading}
-              className="px-3 py-1.5 text-xs sm:text-sm bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 disabled:opacity-50 transition-colors font-medium whitespace-nowrap"
+              className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-400 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
             >
               {isLoading ? "..." : "✨ Detailed"}
             </button>
             <button
               onClick={() => handleRefine("Shorten this significantly while keeping all key points")}
               disabled={isLoading}
-              className="px-3 py-1.5 text-xs sm:text-sm bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 disabled:opacity-50 transition-colors font-medium whitespace-nowrap"
+              className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 disabled:from-gray-400 disabled:to-gray-400 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
             >
               {isLoading ? "..." : "⚡ Shorten"}
             </button>
             <button
               onClick={() => setIsEditing(true)}
-              className="px-3 py-1.5 text-xs sm:text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium whitespace-nowrap"
+              className="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-gray-200 to-gray-300 hover:from-gray-300 hover:to-gray-400 text-gray-700 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
             >
               ✏️ Edit
             </button>
@@ -159,7 +122,7 @@ export default function Section({ title, content, onUpdate }: Props) {
       </div>
 
       {/* Divider */}
-      <div className="h-px bg-gradient-to-r from-gray-200 to-transparent mb-4 sm:mb-6"></div>
+      <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-transparent mb-6 rounded-full"></div>
 
       {/* Content View */}
       {!isEditing && <div className="print:text-xs">{renderContent(content)}</div>}
@@ -167,31 +130,23 @@ export default function Section({ title, content, onUpdate }: Props) {
       {/* Edit Mode */}
       {isEditing && onUpdate && (
         <div className="space-y-4">
-          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
-            <p className="font-medium mb-1">📝 Editing Tips:</p>
-            <ul className="text-xs space-y-1">
-              <li>Use • for bullet points (e.g., • Your point)</li>
-              <li>Use numbers for lists (e.g., 1. Your step)</li>
-              <li>End lines with : for bold headings</li>
-            </ul>
-          </div>
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
-            className="w-full border border-gray-300 rounded-lg p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-gray-700"
+            className="w-full border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm text-gray-700 bg-gray-50 resize-none"
             rows={12}
-            placeholder="Edit the content here. Maintain formatting with • for bullets and 1. for numbers..."
+            placeholder="Edit the content here..."
           />
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-3 justify-end">
             <button
               onClick={handleCancel}
-              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              className="px-6 py-2 text-sm font-semibold bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-all duration-200 active:scale-95"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              className="px-6 py-2 text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg active:scale-95"
             >
               Save Changes
             </button>
