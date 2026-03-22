@@ -82,11 +82,11 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-50 flex flex-col">
       {/* Header */}
-      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white">
+      <div className="border-b border-gray-200 sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
             AI Planning Agent
           </h1>
           <p className="text-gray-600 text-sm mt-1">
@@ -95,13 +95,14 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      {/* Main Content */}
+      <div className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Input Section */}
         <InputBox onSubmit={handleSubmit} isLoading={isLoading} />
 
         {/* Error State */}
         {error && (
-          <div className="mt-6 sm:mt-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+          <div className="mt-6 sm:mt-8 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm animate-pulse">
             <p className="font-medium">⚠️ Error</p>
             <p className="mt-1">{error}</p>
           </div>
@@ -112,9 +113,9 @@ export default function Home() {
           <div className="mt-12 text-center py-12">
             <div className="inline-flex flex-col items-center gap-4">
               <div className="flex gap-1.5">
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                <div className="w-2 h-2 bg-gray-900 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0s" }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                <div className="w-2 h-2 bg-blue-600 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></div>
               </div>
               <div>
                 <p className="text-gray-900 font-medium text-sm">Generating your strategic report...</p>
@@ -130,12 +131,12 @@ export default function Home() {
             {/* Report Header with Export Buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div className="flex-1">
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Strategic Report</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Strategic Report</h2>
                 <p className="text-gray-600 text-sm mt-2">
                   Challenge: <span className="font-medium text-gray-900">{problemStatement}</span>
                 </p>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2 flex-shrink-0 flex-col sm:flex-row">
                 <ReportExport report={report} problemStatement={problemStatement} reportRef={reportRef} />
               </div>
             </div>
@@ -143,11 +144,11 @@ export default function Home() {
             {/* Report Content */}
             <div ref={reportRef} className="space-y-8 sm:space-y-10">
               {/* Cover Section */}
-              <div className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-xl p-6 sm:p-10 text-center mb-8">
-                <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+              <div className="bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 border border-blue-200 rounded-xl p-6 sm:p-10 text-center mb-8 shadow-md">
+                <h3 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
                   Strategic Planning Report
                 </h3>
-                <p className="text-base sm:text-lg text-gray-600 mb-4 max-w-2xl mx-auto">
+                <p className="text-base sm:text-lg text-gray-700 mb-4 max-w-2xl mx-auto leading-relaxed">
                   {problemStatement}
                 </p>
                 <p className="text-xs sm:text-sm text-gray-500">
@@ -194,7 +195,7 @@ export default function Home() {
         {!report && !isLoading && (
           <div className="mt-16 text-center py-16 sm:py-20">
             <div className="text-5xl sm:text-6xl mb-4">🎯</div>
-            <p className="text-lg sm:text-xl text-gray-600">
+            <p className="text-lg sm:text-xl text-gray-600 font-medium">
               Enter a problem statement to generate a strategic report
             </p>
             <p className="text-gray-500 text-sm mt-3">
@@ -203,6 +204,15 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 bg-white/50 backdrop-blur-sm mt-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+          <p className="text-gray-600 text-xs sm:text-sm">
+            © 2026 Akhila Sanga | AI Planning Agent | Version v1.1.0
+          </p>
+        </div>
+      </footer>
     </main>
   );
 }

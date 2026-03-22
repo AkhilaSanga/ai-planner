@@ -10,6 +10,7 @@ type Report = {
 function parseContentToSections(content: string): Paragraph[] {
   const lines = content.split("\n").filter((line) => line.trim());
   const paragraphs: Paragraph[] = [];
+  let numberingIndex = 1;
 
   for (const line of lines) {
     const trimmedLine = line.trim();
@@ -30,28 +31,26 @@ function parseContentToSections(content: string): Paragraph[] {
       paragraphs.push(
         new Paragraph({
           text: trimmedLine.replace(/^[•-]\s*/, ""),
-          spacing: { after: 50 },
+          spacing: { after: 80 },
           bullet: {
             level: 0,
           },
         })
       );
     }
-    // Numbered item
+    // Numbered item - use standard numbering
     else if (/^\d+\.\s/.test(trimmedLine)) {
-      const match = trimmedLine.match(/^(\d+)\.\s(.+)$/);
-      if (match) {
-        paragraphs.push(
-          new Paragraph({
-            text: match[2],
-            spacing: { after: 50 },
-            numPr: {
-              ilvl: 0,
-              numId: 1,
-            },
-          })
-        );
-      }
+      const text = trimmedLine.replace(/^\d+\.\s*/, "");
+      paragraphs.push(
+        new Paragraph({
+          text: text,
+          spacing: { after: 80 },
+          numPr: {
+            ilvl: 0,
+            numId: 1,
+          },
+        })
+      );
     }
     // Regular paragraph
     else if (trimmedLine) {
@@ -175,7 +174,7 @@ export async function POST(req: Request) {
         pageBreakBefore: true,
       }),
 
-      // Action Plan Section
+      // Action Plan Section with proper numbering
       new Paragraph({
         text: "Action Plan",
         heading: HeadingLevel.HEADING_2,

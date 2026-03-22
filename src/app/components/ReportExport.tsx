@@ -17,9 +17,11 @@ type Props = {
 
 export default function ReportExport({ report, problemStatement, reportRef }: Props) {
   const [isExporting, setIsExporting] = useState(false);
+  const [exportType, setExportType] = useState<"docx" | "pdf" | null>(null);
 
   const handleExportDocx = async () => {
     setIsExporting(true);
+    setExportType("docx");
     try {
       const response = await fetch("/api/export/docx", {
         method: "POST",
@@ -56,11 +58,13 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       alert(`❌ Failed to export DOCX: ${error instanceof Error ? error.message : "Unknown error"}`);
     } finally {
       setIsExporting(false);
+      setExportType(null);
     }
   };
 
   const handleExportPdf = async () => {
     setIsExporting(true);
+    setExportType("pdf");
     try {
       const response = await fetch("/api/export/pdf", {
         method: "POST",
@@ -108,6 +112,7 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
             setTimeout(() => {
               document.body.removeChild(iframe);
               setIsExporting(false);
+              setExportType(null);
             }, 1000);
           }, 500);
         }
@@ -120,6 +125,7 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       console.error("PDF Export error:", error);
       alert(`❌ Failed to export PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
       setIsExporting(false);
+      setExportType(null);
     }
   };
 
@@ -128,9 +134,9 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       <button
         onClick={handleExportDocx}
         disabled={isExporting}
-        className="px-3 sm:px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base whitespace-nowrap"
+        className="px-4 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-200 text-sm sm:text-base whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 active:scale-100 disabled:hover:scale-100"
       >
-        {isExporting ? (
+        {isExporting && exportType === "docx" ? (
           <>
             <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span className="hidden sm:inline">Exporting...</span>
@@ -142,9 +148,9 @@ export default function ReportExport({ report, problemStatement, reportRef }: Pr
       <button
         onClick={handleExportPdf}
         disabled={isExporting}
-        className="px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium rounded-lg flex items-center justify-center gap-2 transition-colors text-sm sm:text-base whitespace-nowrap"
+        className="px-4 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-200 text-sm sm:text-base whitespace-nowrap shadow-md hover:shadow-lg transform hover:scale-105 active:scale-100 disabled:hover:scale-100"
       >
-        {isExporting ? (
+        {isExporting && exportType === "pdf" ? (
           <>
             <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
             <span className="hidden sm:inline">Exporting...</span>

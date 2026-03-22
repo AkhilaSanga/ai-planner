@@ -15,7 +15,9 @@ export default function Section({ title, content, onUpdate }: Props) {
 
   const handleSave = () => {
     if (onUpdate) {
-      onUpdate(editValue);
+      // Preserve formatting - ensure bullets and numbers are maintained
+      const saved = preserveFormatting(editValue);
+      onUpdate(saved);
     }
     setIsEditing(false);
   };
@@ -34,15 +36,45 @@ export default function Section({ title, content, onUpdate }: Props) {
         body: JSON.stringify({ content, instruction }),
       });
       const data = await res.json();
-      setEditValue(data.data);
+      // Ensure formatted response maintains bullets/numbers
+      const formatted = preserveFormatting(data.data);
+      setEditValue(formatted);
       if (onUpdate) {
-        onUpdate(data.data);
+        onUpdate(formatted);
       }
     } catch (error) {
       console.error("Error refining content:", error);
+      alert("Failed to refine content. Please try again.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Preserve bullet and numbering formatting
+  const preserveFormatting = (text: string): string => {
+    const lines = text.split("\n");
+    return lines
+      .map((line) => {
+        const trimmed = line.trim();
+        
+        // Already has bullet
+        if (trimmed.startsWith("•") || trimmed.startsWith("-")) {
+          return trimmed.startsWith("•") ? trimmed : "• " + trimmed.substring(2);
+        }
+        
+        // Already has number
+        if (/^\d+\.\s/.test(trimmed)) {
+          return trimmed;
+        }
+        
+        // Empty or heading
+        if (!trimmed || trimmed.endsWith(":")) {
+          return trimmed;
+        }
+        
+        return trimmed;
+      })
+      .join("\n");
   };
 
   // Render structured content (lists, paragraphs, etc.)
@@ -135,12 +167,20 @@ export default function Section({ title, content, onUpdate }: Props) {
       {/* Edit Mode */}
       {isEditing && onUpdate && (
         <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
+            <p className="font-medium mb-1">📝 Editing Tips:</p>
+            <ul className="text-xs space-y-1">
+              <li>Use • for bullet points (e.g., • Your point)</li>
+              <li>Use numbers for lists (e.g., 1. Your step)</li>
+              <li>End lines with : for bold headings</li>
+            </ul>
+          </div>
           <textarea
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             className="w-full border border-gray-300 rounded-lg p-3 sm:p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm text-gray-700"
-            rows={10}
-            placeholder="Edit the content here..."
+            rows={12}
+            placeholder="Edit the content here. Maintain formatting with • for bullets and 1. for numbers..."
           />
           <div className="flex gap-2 justify-end">
             <button
